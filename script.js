@@ -115,7 +115,7 @@ function SelectPieces() {
       const piece = e.target;
       if (
         piece.classList.contains("piece") &&
-        !piece.classList.contains("selected") 
+        !piece.classList.contains("selected")
       ) {
         piece.classList.add("selected");
         piece.parentElement.classList.add("selected");
@@ -129,10 +129,8 @@ function SelectPieces() {
 
 // Evento principal
 // Ejecuta las funciones al cargar el DOM
-if (window.location.pathname.includes("index.html")) {
-  document.addEventListener("DOMContentLoaded", () => {
-    CreateBoard();
-    SetupBoardPieces();
-    SelectPieces();
-  });
-}
+document.addEventListener("DOMContentLoaded", () => {
+  CreateBoard();
+  SetupBoardPieces();
+  SelectPieces();
+});
