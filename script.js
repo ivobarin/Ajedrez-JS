@@ -113,19 +113,47 @@ function SelectPieces() {
   cells.forEach((cell) => {
     cell.addEventListener("click", (e) => {
       const piece = e.target;
-      if (
-        piece.classList.contains("piece") &&
-        !piece.classList.contains("selected")
-      ) {
+
+      if (!cell.querySelector(".piece")) {
+        return; 
+      }
+      const selectedPiece = document.querySelector(".piece.selected");
+      if (selectedPiece) {
+        selectedPiece.classList.remove("selected");
+        selectedPiece.parentElement.classList.remove("selected");
+      }
+
+      if (piece.classList.contains("piece")) {
         piece.classList.add("selected");
         piece.parentElement.classList.add("selected");
-      } else {
-        piece.classList.remove("selected");
-        piece.parentElement.classList.remove("selected");
       }
     });
   });
 }
+
+/**
+ * permite mover las piezas seleccionadas en el tablero
+ * selecciona la pieza y la mueve a la casilla seleccionada
+ * si la casilla seleccionada tiene una pieza, la pieza se intercambia
+ */
+function moverPieza(){
+  const cells = document.querySelectorAll(".box");
+  cells.forEach((cell) => {
+    cell.addEventListener("click", (e) => {
+      const box = e.target;
+      if (!(box.classList.contains("selected"))) {
+        const pieceSelected = document.querySelector(".selected");
+        if (pieceSelected && box.innerHTML === "") {
+          box.innerHTML = pieceSelected.innerHTML;
+          pieceSelected.innerHTML = "";
+          pieceSelected.classList.remove("selected");
+          pieceSelected.parentElement.classList.remove("selected");
+        }
+      }
+    });
+  });
+}
+
 
 // Evento principal
 // Ejecuta las funciones al cargar el DOM
@@ -133,4 +161,5 @@ document.addEventListener("DOMContentLoaded", () => {
   CreateBoard();
   SetupBoardPieces();
   SelectPieces();
+  moverPieza()
 });
