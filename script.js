@@ -104,62 +104,75 @@ function SetupBoardPieces() {
 }
 
 /**
- * Funcion que va a seleccionar las piezas del tablero solo una a la vez.
- * Al seleccionar una pieza, esta se va a resaltar con un borde de color.
- * Si se selecciona otra pieza, la anterior pierde el borde y se desealecciona.
+ * Función para seleccionar las piezas del tablero.
+ * Solo una pieza puede estar seleccionada a la vez.
  */
 function SelectPieces() {
   const cells = document.querySelectorAll(".box");
-  cells.forEach((cell) => {
-    cell.addEventListener("click", (e) => {
-      const piece = e.target;
 
-      if (!cell.querySelector(".piece")) {
-        return; 
+  cells.forEach((cell) => {
+    cell.addEventListener("click", () => {
+      // Verificar si la celda contiene una pieza
+      const piece = cell.querySelector(".piece");
+      if (!piece) {
+        return; // No hacer nada si la celda está vacía
       }
+
+      // Deseleccionar cualquier pieza previamente seleccionada
       const selectedPiece = document.querySelector(".piece.selected");
+      const selectedBox = document.querySelector(".box.selected");
+
       if (selectedPiece) {
         selectedPiece.classList.remove("selected");
-        selectedPiece.parentElement.classList.remove("selected");
+      }
+      if (selectedBox) {
+        selectedBox.classList.remove("selected");
       }
 
-      if (piece.classList.contains("piece")) {
-        piece.classList.add("selected");
-        piece.parentElement.classList.add("selected");
-      }
+      // Seleccionar la nueva pieza y su casilla
+      piece.classList.add("selected");
+      cell.classList.add("selected");
     });
   });
 }
 
 /**
- * permite mover las piezas seleccionadas en el tablero
- * selecciona la pieza y la mueve a la casilla seleccionada
- * si la casilla seleccionada tiene una pieza, la pieza se intercambia
+ * Función para mover piezas seleccionadas en el tablero.
  */
-function moverPieza(){
+function moverPieza() {
   const cells = document.querySelectorAll(".box");
+
   cells.forEach((cell) => {
-    cell.addEventListener("click", (e) => {
-      const box = e.target;
-      if (!(box.classList.contains("selected"))) {
-        const pieceSelected = document.querySelector(".selected");
-        if (pieceSelected && box.innerHTML === "") {
-          box.innerHTML = pieceSelected.innerHTML;
-          pieceSelected.innerHTML = "";
-          pieceSelected.classList.remove("selected");
-          pieceSelected.parentElement.classList.remove("selected");
-        }
+    cell.addEventListener("click", () => {
+      // Verificar si la casilla clicada está vacía
+      if (cell.querySelector(".piece")) {
+        return; // No hacer nada si ya hay una pieza en la casilla
+      }
+
+      // Obtener la pieza seleccionada y su casilla
+      const selectedPiece = document.querySelector(".piece.selected");
+      const selectedBox = document.querySelector(".box.selected");
+
+      if (selectedPiece && selectedBox) {
+        // Mover la pieza a la nueva casilla
+        cell.innerHTML = selectedPiece.outerHTML;
+
+        // Limpiar la casilla original
+        selectedBox.innerHTML = "";
+
+        // Deseleccionar la pieza y la casilla
+        cell.children[0].classList.remove("selected");
+        selectedPiece.classList.remove("selected");
+        selectedBox.classList.remove("selected");
       }
     });
   });
 }
 
-
-// Evento principal
-// Ejecuta las funciones al cargar el DOM
+// Evento principal: Ejecutar las funciones al cargar el DOM
 document.addEventListener("DOMContentLoaded", () => {
   CreateBoard();
   SetupBoardPieces();
   SelectPieces();
-  moverPieza()
+  moverPieza();
 });
