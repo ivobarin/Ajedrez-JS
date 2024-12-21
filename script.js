@@ -1,3 +1,21 @@
+const whitePieces = {
+  rook: "♖",
+  knight: "♘",
+  bishop: "♗",
+  queen: "♕",
+  king: "♔",
+  pawn: "♙",
+};
+
+const BlackPieces = {
+  rook: "♜",
+  knight: "♞",
+  bishop: "♝",
+  queen: "♛",
+  king: "♚",
+  pawn: "♟",
+};
+
 /**
  * Crea un tablero de ajedrez en HTML y lo muestra en el navegador.
  * Genera IDs para cada casilla del tablero y las colorea alternando entre blanco y negro
@@ -39,24 +57,6 @@ function AddPieces(posicion, color) {
  * Determina las posiciones iniciales de las piezas blancas y negras
  */
 function SetupBoardPieces() {
-  const whitePieces = {
-    rook: "♖",
-    knight: "♘",
-    bishop: "♗",
-    queen: "♕",
-    king: "♔",
-    pawn: "♙",
-  };
-
-  const BlackPieces = {
-    rook: "♜",
-    knight: "♞",
-    bishop: "♝",
-    queen: "♛",
-    king: "♚",
-    pawn: "♟",
-  };
-
   // Posiciones iniciales de las piezas blancas
   const whitePos = [
     "a8",
@@ -103,35 +103,73 @@ function SetupBoardPieces() {
   AddPieces(blackPos, BlackPieces);
 }
 
+// Funciones auxiliares para verificar si una pieza es blanca o negra
+function isWhitePiece(piece) {
+  return Object.values(whitePieces).includes(piece);
+}
+
+function isBlackPiece(piece) {
+  return Object.values(BlackPieces).includes(piece);
+}
+
 /**
+ * BUG: Se agregan piezas duplicadas en el tablero a seleccionar una pieza de diferente color.
+ 
  * Función para seleccionar las piezas del tablero.
  * Solo una pieza puede estar seleccionada a la vez.
+ * Si una pieza de diferente color es seleccionada, se mueve la pieza.
+ * Si una pieza del mismo color es seleccionada, se deselecciona la pieza anterior.
+ * Si una casilla vacía es seleccionada, se mueve la pieza usando la función ExecuteMove().
  */
-function SelectPieces() {
+function selectedPieces() {
   const cells = document.querySelectorAll(".box");
 
   cells.forEach((cell) => {
     cell.addEventListener("click", () => {
-      // Verificar si la celda contiene una pieza
       const piece = cell.querySelector(".piece");
-      if (!piece) {
-        return; // No hacer nada si la celda está vacía
-      }
+     
+      // si la casilla no contiene una pieza, no hacer nada
+      if (!piece) return; 
 
-      // Deseleccionar cualquier pieza previamente seleccionada
+      // determinar el color de la pieza seleccionada
+      const currentColor = isBlackPiece(piece.textContent) ? "black" : "white";
+      
+      // obtener la pieza y la casilla seleccionada
       const selectedPiece = document.querySelector(".piece.selected");
       const selectedBox = document.querySelector(".box.selected");
 
+      // si hay una pieza seleccionada, determinar su color
       if (selectedPiece) {
-        selectedPiece.classList.remove("selected");
-      }
-      if (selectedBox) {
-        selectedBox.classList.remove("selected");
+        const selectedColor = isBlackPiece(selectedPiece.textContent) ? "black" : "white";
+
+        // Obtener la última casilla seleccionada si existe
+        let lastMove = document.getElementById(sessionStorage.getItem("lastMove"));
+
+        // Verificar si la pieza seleccionada es de diferente color
+        if (currentColor !== selectedColor) {
+          // Otro color - Mover la pieza a la nueva casilla
+          cell.innerHTML = selectedPiece.outerHTML;
+          lastMove.innerHTML = ""; // Limpiar la casilla anterior
+          
+          // Deseleccionar la pieza y la casilla
+          cell.children[0].classList.remove("selected");
+          selectedPiece.classList.remove("selected");
+          selectedBox.classList.remove("selected");
+        } else {
+          // Mismo color - Deseleccionar la pieza y la casilla
+          selectedPiece.classList.remove("selected");
+          selectedBox.classList.remove("selected");
+        }
       }
 
-      // Seleccionar la nueva pieza y su casilla
-      piece.classList.add("selected");
-      cell.classList.add("selected");
+      // Select new piece if not capturing
+      if (!cell.contains(selectedPiece)) {
+        piece.classList.add("selected");
+        cell.classList.add("selected");
+      }
+
+      // Guardar la última casilla seleccionada
+      sessionStorage.setItem("lastMove", cell.id);
     });
   });
 }
@@ -139,14 +177,14 @@ function SelectPieces() {
 /**
  * Función para mover piezas seleccionadas en el tablero.
  */
-function moverPieza() {
+function ExecuteMove() {
   const cells = document.querySelectorAll(".box");
 
   cells.forEach((cell) => {
     cell.addEventListener("click", () => {
       // Verificar si la casilla clicada está vacía
       if (cell.querySelector(".piece")) {
-        return; // No hacer nada si ya hay una pieza en la casilla
+        return; // No hacer nada si la casilla contiene
       }
 
       // Obtener la pieza seleccionada y su casilla
@@ -173,6 +211,6 @@ function moverPieza() {
 document.addEventListener("DOMContentLoaded", () => {
   CreateBoard();
   SetupBoardPieces();
-  SelectPieces();
-  moverPieza();
+  selectedPieces();
+  ExecuteMove();
 });
